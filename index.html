@@ -4,16 +4,11 @@
     <meta charset="UTF-8">
     <title>CSVファイルから住所を地図に表示</title>
     <style>
-        /* #mapの高さをビューポートの100%に設定 */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-
+        /* 地図のサイズ調整 */
         #map {
-            height: 100vh; /* ビューポートの高さ100% */
-            width: 100%;
+            width: 100%;  /* 横幅を100%に設定 */
+            height: 89vh; /* 高さを画面の70%に設定 */
+            max-height: 1200px; /* 最大高さを500pxに設定 */
         }
     </style>
 </head>
