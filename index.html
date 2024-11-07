@@ -4,7 +4,17 @@
     <meta charset="UTF-8">
     <title>CSVファイルから住所を地図に表示</title>
     <style>
-        #map { height: 500px; width: 100%; }
+        /* #mapの高さをビューポートの100%に設定 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        #map {
+            height: 100vh; /* ビューポートの高さ100% */
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -13,7 +23,7 @@
 <input type="file" id="csvFileInput" accept=".csv" />
 <div id="map"></div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABxCY60JA8uxqd-6xEXM2q-4BGrgZC3Bk&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABxCY60JA8uxqd-6xEXM2q-4BGrgZC3Bk&libraries=places" async defer></script>
 <script>
     let map;
     let markers = []; // ピンを保存する配列
@@ -34,7 +44,7 @@
         reader.onload = function(e) {
             const rows = e.target.result.split('\n').map(row => row.split(','));
             rows.forEach((row, index) => {
-                if (index > 0 && row.length > 0) { // 最初の行はヘッダーなのでスキップ
+                if (index > 0 && row.length > 0 && row[0].trim() !== "") { // 最初の行はヘッダーなのでスキップ
                     const address = row[0].trim();
                     reverseGeocode(address);
                 }
@@ -69,7 +79,7 @@
 
                 markers.push(marker); // ピンを保存
             } else {
-                alert("住所のジオコーディングに失敗しました: " + status);
+                alert("住所のジオコーディングに失敗しました: " + status + "住所：" + address);
             }
         });
     }
