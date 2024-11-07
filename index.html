@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>CSVファイルから住所を地図に表示</title>
+    <style>
+        #map { height: 500px; width: 100%; }
+    </style>
+</head>
+<body>
+
+<h3>CSVファイルをアップロードして住所を地図に表示</h3>
+<input type="file" id="csvFileInput" accept=".csv" />
+<div id="map"></div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABxCY60JA8uxqd-6xEXM2q-4BGrgZC3Bk&libraries=places"></script>
+<script>
+    let map;
+    let markers = []; // ピンを保存する配列
+
+    // Google Mapsの初期化
+    function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 35.6895, lng: 139.6917 },  // 初期設定: 東京
+            zoom: 10,
+        });
+    }
+
+    // CSVファイルの読み込み
+    document.getElementById('csvFileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const rows = e.target.result.split('\n').map(row => row.split(','));
+            rows.forEach((row, index) => {
+                if (index > 0 && row.length > 0) { // 最初の行はヘッダーなのでスキップ
+                    const address = row[0].trim();
+                    reverseGeocode(address);
+                }
+            });
+        };
+        
+        reader.readAsText(file);
+    });
+
+    // 住所から緯度経度を逆ジオコーディング
+    function reverseGeocode(address) {
+        const geocoder = new google.maps.Geocoder();
+        
+        geocoder.geocode({ address: address }, (results, status) => {
+            if (status === "OK") {
+                const lat = results[0].geometry.location.lat();
+                const lng = results[0].geometry.location.lng();
+
+                // ピンを地図に追加
+                const marker = new google.maps.Marker({
+                    map: map,
+                    position: { lat: lat, lng: lng },
+                    title: address,
+                    icon: getMarkerIcon("red"), // 初期アイコンは赤
+                });
+
+                // クリックでピンの色を変更
+                marker.addListener('click', function() {
+                    const currentColor = marker.icon.url.includes("red") ? "blue" : "red";
+                    marker.setIcon(getMarkerIcon(currentColor));
+                });
+
+                markers.push(marker); // ピンを保存
+            } else {
+                alert("住所のジオコーディングに失敗しました: " + status);
+            }
+        });
+    }
+
+    // ピンの色を変更するためのアイコンを取得
+    function getMarkerIcon(color) {
+        return {
+            url: color === "red" ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png" : "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            scaledSize: new google.maps.Size(32, 32), // アイコンサイズ
+        };
+    }
+
+    // 初期化関数を呼び出す
+    window.onload = initMap;
+</script>
+
+</body>
+</html>
