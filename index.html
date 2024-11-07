@@ -22,6 +22,7 @@
 <script>
     let map;
     let markers = []; // ピンを保存する配列
+    let firstAddressLatLng = null; // 最初の住所の緯度経度
 
     // Google Mapsの初期化
     function initMap() {
@@ -42,6 +43,9 @@
                 if (index > 0 && row.length > 0 && row[0].trim() !== "") { // 最初の行はヘッダーなのでスキップ
                     const address = row[0].trim();
                     reverseGeocode(address);
+                    if (firstAddressLatLng === null) { // 最初の住所であれば地図を移動
+                        firstAddressLatLng = { address: address };
+                    }
                 }
             });
         };
@@ -73,6 +77,14 @@
                 });
 
                 markers.push(marker); // ピンを保存
+
+                // 最初の住所に移動
+                if (firstAddressLatLng !== null) {
+                    map.setCenter({ lat: lat, lng: lng });
+                    map.setZoom(15); // ズームレベルを設定
+                    firstAddressLatLng = null; // 最初の住所を処理したのでリセット
+                }
+
             } else {
                 alert("住所のジオコーディングに失敗しました: " + status + "住所：" + address);
             }
